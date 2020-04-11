@@ -53,9 +53,9 @@
 %type <node> Condition
 %type <node> While
 %type <node> LTerm
-%type <node> LFactor
 %type <node> Compare
-
+//%type <node> OP
+%type <node> LHS
 // Add the rest of the types for the grammar's symbols
 
 
@@ -72,13 +72,8 @@ DeclarationList:  | Declaration DeclarationList // Note that a DeclarationList m
 Declaration: "int" IDENT ';' {AddDeclaration($2); printf("Processing declaration of %s\n", $2);}
 ;
 
-Factor: IDENT 		{$$ = CreateIdentNode($1); printf("Creating IDENT node for %s\n", $1);}
-	| NUM 		{$$ = CreateNumNode($1); printf("Creating NUM node for %d\n", $1);}
-	| '('Expr')'	{$$ = $2;}
-;
-
 StatementList: 	{$$ = NULL;}
-               | Statement StatementList	{$$ = CreateStatementListNode($1,$2); printf("Adding a statement to a statement list \n");}
+               | Statement StatementList	{$$ = CreateStatementListNode($1,$2); printf("Adding a Statement to a Statement list \n");}
 ;
 
 Statement: Assignment		{$$ = $1;}
@@ -86,17 +81,24 @@ Statement: Assignment		{$$ = $1;}
 	| While			{$$ = $1;}
 ;
 
-Assignment: LHS '=' Expr ';'	{$$ = CreateAssignmentNode($1, $3; printf("Adding assignment node of %d to %d\n", $3, $1);}
+Assignment: LHS '=' Expr ';'	{$$ = CreateAssignmentNode($1, $3); printf("Creating Assignment node\n");}
 ;
 
+LHS: IDENT			{$$ = CreateIdentNode($1); printf("Creating left-hand IDENT node for %s\n", $1);}
+
 Expr: Term			{$$ = $1;}
- 	| Expr '+' Term		{$$ = CreateAdditionNode($1, $3);}
-	| Expr '-' Term		{$$ = CreateSubtractionNode($1, $3);}
+ 	| Expr '+' Term		{$$ = CreateAdditionNode($1, $3); printf("Creating Addition node\n");}
+	| Expr '-' Term		{$$ = CreateSubtractionNode($1, $3); printf("Creating Subtraction node\n");}
 ;
 
 Term: Factor       		{$$ = $1;}
-	| Term '*' Factor	{$$ = CreateMultNode($1, $3);}
-	| Term '/' Factor	{$$ = CreateDivNode(#1, $3);}
+	| Term '*' Factor	{$$ = CreateMultNode($1, $3); printf("Creating Multiplication node\n");}
+	| Term '/' Factor	{$$ = CreateDivNode($1, $3); printf("Creating Division node\n");}
+;
+
+Factor: IDENT 		{$$ = CreateIdentNode($1); printf("Creating IDENT node for %s\n", $1);}
+	| NUM 		{$$ = CreateNumNode($1); printf("Creating NUM node for %d\n", $1);}
+	| '('Expr')'	{$$ = $2; printf("Creating Expression node in parentheses\n")}
 ;
 
 If: IF '(' Condition ')' '{' StatementList '}'		{$$ = CreateIfNode($3, $6); printf("Creating if node\n")}
@@ -104,26 +106,33 @@ If: IF '(' Condition ')' '{' StatementList '}'		{$$ = CreateIfNode($3, $6); prin
 ;
 
 Condition: LTerm		{$$ = $1;}
-	| Condition OR LTerm	{$$ = CreateOrNode($1, $3);}
+	| Condition OR LTerm	{$$ = CreateOrNode($1, $3); printf("Creating OR node\n");}
 ;
 
-LTerm: LFactor			{$$ = $1;}
-	| LTerm AND LFactor	{$$ = CreateAndNode($1, $3); printf("Creating and node\n");}
+LTerm: Compare			{$$ = $1;}
+	| LTerm AND Compare	{$$ = CreateAndNode($1, $3); printf("Creating AND node\n");}
 ;
 
-LFactor: Compare		{$$ = $1;}
+Compare: Expr ">=" Expr		{$$ = CreateGreaterEqualNode($1, $3); printf("Creating Compare node\n");}
+	|Expr "<=" Expr		{$$ = CreateLessEqualNode($1, $3); printf("Creating Compare node\n");}
+	|Expr "==" Expr		{$$ = CreateEqualNode($1, $3); printf("Creating Compare node\n");}
+	|Expr "!=" Expr		{$$ = CreateNotEqualNode($1, $3); printf("Creating Compare node\n");}
+	|Expr '<' Expr		{$$ = CreateLessNode($1, $3); printf("Creating Compare node\n");}
+	|Expr '>' Expr		{$$ = CreateGreaterNode($1, $3); printf("Creating Compare node\n");}
+
+
 ;
 
-Compare: Expr LE Expr		{$$ = CreateLessEqualNode($1, $3); printf("Creating less/equal node\n");}
-	|Expr GE Expr		{$$ = CreateGreaterEqualNode($1, $3); printf("Creating greater/equal than node\n");}
-	|Expr EQ Expr		{$$ = CreateEqualNode($1, $3); printf("Creating equal node\n");}
-	|Expr NE Expr		{$$ = CreateNotEqualNode($1, $3); printf("Creating not equal node\n");}
-	|Expr '>' Expr		{$$ = CreateGreaterThanNode($1, $3); printf("Creating greater than node\n");}
-	|Expr '<' Expr		{$$ = CreateLessThanNode($1, $3); printf("Creating less than node\n");}
+/*OP:	GE		{$$ = $1;}
+	|LE		{$$ = $1;}
+	|EQ		{$$ = $1;}
+	|NE		{$$ = $1;}
+	|'>'		{$$ = $1;}
+	|'<'		{$$ = $1;}
+;*/
+
+While: "while" '(' Condition ')' '{' StatementList '}'	{$$ = CreateWhileNode($3, $6); printf("Creating while loop node\n");}
 ;
-
-While: "while" '(' Condition ')' '{' StatementList '}'	{$$ + CreateWhileNode($3, $6); printf("Creating while node\n");}
-
 
 
 %%
