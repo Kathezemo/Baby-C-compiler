@@ -1,7 +1,8 @@
 #ifndef YOUR_CODE_H
 #define YOUR_CODE_H
 
-#define MAX_VARIABLES 50
+#define ST_StartSize 20
+#define threshold = .75f;
 
 
 typedef enum{ASTNODE_ARITH_OP, ASTNODE_LOGIC_OP, ASTNODE_COMPARE, ASTNODE_ASSIGN, ASTNODE_IDENT, ASTNODE_NUM, ASTNODE_IF, ASTNODE_WHILE} ASTNodeType;
@@ -30,7 +31,15 @@ typedef struct {
 	char* name;
 } st_entry;
 
-st_entry symbol_table[MAX_VARIABLES];
+typedef struct {
+	st_entry* table;
+	int size;
+	int thresh;
+	int curSize;
+} symbol_table;
+
+symbol_table symbolTable;
+
 
 // Add functions to create the different kinds of ASTNodes 
 // These functions are called by the code embedded in the grammar.

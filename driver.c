@@ -38,7 +38,12 @@ int main(int argc, char**argv)
 
 void initSymbolTable(){
 	int i;
-	for(i = 0; i<MAX_VARIABLES; i++){
-		symbol_table[i].offset = -1;
+	symbolTable.thresh = ST_StartSize * 3 /4;
+	symbolTable.table = (st_entry*) malloc(sizeof(st_entry) * ST_StartSize);
+	for(i = 0; i<ST_StartSize; i++){
+		symbolTable.table[i].offset = -1;
 	}
+	symbolTable.size = ST_StartSize;
+
+	symbolTable.curSize = 0;
 }

@@ -101,8 +101,8 @@ Factor: IDENT 		{$$ = CreateIdentNode($1); printf("Creating IDENT node for %s\n"
 	| '('Expr')'	{$$ = $2; printf("Creating Expression node in parentheses\n")}
 ;
 
-If: IF '(' Condition ')' '{' StatementList '}'		{$$ = CreateIfNode($3, $6); printf("Creating if node\n")}
-	| "if" '(' Condition ')' '{' StatementList '}' "else" '{' StatementList '}'	{$$ = CreateIfElseNode($3, $6, $10); printf("Creating If-Else node\n")}
+If: IF '(' Condition ')' '{' StatementList '}'		{$$ = CreateIfNode($3, $6); printf("Creating if Statement node\n")}
+	| "if" '(' Condition ')' '{' StatementList '}' "else" '{' StatementList '}'	{$$ = CreateIfElseNode($3, $6, $10); printf("Creating if-else Statement node\n")}
 ;
 
 Condition: LTerm		{$$ = $1;}

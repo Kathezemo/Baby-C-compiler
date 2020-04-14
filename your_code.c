@@ -6,6 +6,8 @@
 
 int offset = 0;
 
+
+
 // Write the implementations of the functions that do the real work here
 
 ASTNode* CreateNumNode(int num){
@@ -118,20 +120,19 @@ int getHash(char* name){
 	for(i=0; i<strlen(name); i++){
 		index += name[i];
 	}
-	return index % MAX_VARIABLES;
+	return index % symbolTable.size;
 
 }
 
 int searchTable(char* name){
 	int index = getHash(name);
 
-	while(symbol_table[index].offset != -1){
-		if(strcmp(symbol_table[index].name, name) == 0){
-
+	while(symbolTable.table[index].offset != -1){
+		if(strcmp(symbolTable.table[index].name, name) == 0){
 			return index;
 		}
 		index++;
-		index %= MAX_VARIABLES;
+		index %= symbolTable.size;
 	}
 
 	return -1;
@@ -146,11 +147,34 @@ int nextOffset(){
 void stInsert(char* name){
 	int ind = getHash(name);
 
-	while(symbol_table[ind].offset != -1){
-		ind = (ind + 1) % MAX_VARIABLES;
+	while(symbolTable.table[ind].offset != -1){
+		ind = (ind + 1) % symbolTable.size;
 	}
-	symbol_table[ind].name = name;
-	symbol_table[ind].offset = nextOffset();
+	symbolTable.table[ind].name = name;
+	symbolTable.table[ind].offset = nextOffset();
+	symbolTable.curSize++;
+	if(symbolTable.curSize >= symbolTable.thresh){
+		resize();
+	}
+}
+
+void resize(){
+	int i;
+	int oldTableSize = symbolTable.size;
+	int newSize = 2 * symbolTable.size;
+	st_entry* oldTable = symbolTable.table;
+	symbolTable.table = (st_entry*) malloc(sizeof(st_entry) * newSize);
+	for(i = 0; i<newSize; i++){
+		symbolTable.table[i].offset = -1;
+	}
+	for(i = 0; i< sizeof(oldTable)/ sizeof(st_entry); i++){
+		if(oldTable[i].offset != -1){
+			stInsert(oldTable[i].name);
+		}
+	}
+	free(oldTable);
+	symbolTable.size = newSize;
+	symbolTable.thresh = newSize *3 / 4;
 
 }
 
@@ -166,7 +190,7 @@ void dupDeclaration(char* name){
 
 void varNotDeclared(char* name){
 
-	char* str = "IDENT not declared";
+	char* str = "Ident not declared";
 	yyerror(str);
 }
 
